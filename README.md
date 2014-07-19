@@ -1,3 +1,41 @@
+# Current vision
+
+Suppose, we have a research team. We run a central server which stores results of all experiments and all plots. Every researcher additionally runs an empirist-agent for backwards communication between server and researcher.
+Those results and plots are generated using Python and Ruby scripts using packages *empirist-python* and *empirist-ruby* respectively. We call those scripts *experiments*. They publish their results(essentially, CSV files) along with experiment parameters which generated these results on this server. Each experiment can produce several different **data streams** - essentially, different datasets depending on what data we want to store.
+
+So, when we want to perform analysis, we specify the experiment which *we want to have* using an URL, e.g. 
+http://empirist-server.com/ProjectName/ExperimentName/error_function.csv?learning_rate=0.01&weight_decay=0.1&function=mackey-glass will return a regular CSV file.
+
+This makes everything easier. In analysis and publication tools we only specify the parameters of datasets we want to analyse or plot. The system will automatically retrieve the most up-to-date trial with those parameters, or send a message to appropriate empirist-agent to generate such dataset.
+
+Parameters can be either directly specified in the experiment code(see **Parameters** section below), or be picked up by system from environment(git branch/revision, for example, to compare different versions of algorithm).
+
+So in R we would write something like this: 
+
+```R
+#                            project name       experiment        parameters
+trial<-get_trial("FunctionalInputDetecting", "CorrelatedNoise", list(target_function="TripleSine",
+                                                                               predictor_type="NeuralNetwork",
+                                                                               hidden_neurons=5,
+                                                                               timesteps=5000,
+                                                                               runs=10, 
+                                                                               distractors_per_input=2,
+                                                                               gaussian_noise_variance=0,
+                                                                               gaussian_noise_mean=0
+                                                                               ))
+```
+Specifying only the parameters of a trial that we want to analyse. This approach also makes it a lot easier to perform contrast analysis for a certain parameter(to see how the system behaves depending on various values of one parameter with others being fixed) - we just need to change one parameter in a list and most analysis tools will make it as easy as possible.
+
+This can go even further and be extended to plotting -- if experiments produce datasets, then why can't we produce plots? We can reference plots by URL specifying meta-parameters such as width, height and format and reference those plots in a LaTeX document by URL(there are packages that can do that easily). Using ConTeXt package we would specify 
+
+```LaTeX
+externalfigure[http://empirist-server.com/ProjectName/ExperimentName/error_function.pdf?learning_rate=0.01&weight_decay=0.1&function=mackey-glass&_width=5cm&_height=5cm]
+```
+and the system will generate a PDF plot with specified experiment parameters(internally those parameters will just be passed to a function which looks up specific dataset used by plot) and then generate a plot using various meta-parameters. 
+
+Of course this will have some bells and whistles - for example we should be able to specify multiple values for some of the parameter and a meta-parameter that tells the system how to handle multiple plots. For example, *_side_by_side* or *_group_by* or something like this.
+
+
 # Research environment with self-organising experiment results.
 
 **TL;DR**
@@ -178,6 +216,10 @@ Have a web-interface that
 ## Even farther future
 Integrate all this into a complete and generalised data-processing pipeline with all the commercial candy stuff included - Hadoop, Pig, Big Data etc.
 And then sell it to Netflix.
+
+## Development setup
+All significant pieces of code should be organised into python packages from the very beginning(it's easy and helps code distribution **A LOT**).
+So every module is being developed in its own directory where we run `watchmedo shell-command --patterns="*.py;" --recursive --command='python setup.py install'`
 
 
 ## Technical details
