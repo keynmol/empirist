@@ -35,6 +35,19 @@ and the system will generate a PDF plot with specified experiment parameters(int
 
 Of course this will have some bells and whistles - for example we should be able to specify multiple values for some of the parameter and a meta-parameter that tells the system how to handle multiple plots. For example, *_side_by_side* or *_group_by* or something like this.
 
+# Communications
+
+1. We start empirist-agent, say on port **5050**. Agent is configured to communicate to Empirist server, which is on port 8080(we consider only one node installation right now, for personal usage)
+2. Then, in R we establish a connection to empirist **agent**(this is important):
+```R
+emp <- connectToEmpirist("localhost",5050)
+emp$getTrial("ProjectName","ExperimentName", list(hidden_layers=c(5,5), function="mackey-glass"))
+```
+3. We retrieve data.
+
+In Ruby or Python bindings(where the communication is actually happening), we connect
+
+
 
 # Research environment with self-organising experiment results.
 
