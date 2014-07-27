@@ -1,0 +1,7 @@
+mongodb:
+ host: localhost
+ port: 27017
+ db: empirist
+ trials_collection: trials
+ plots_collection: plots
+cache_folder: tmp

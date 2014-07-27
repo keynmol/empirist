@@ -6,10 +6,10 @@ require 'slim'
 
 include FileUtils::Verbose
 
-if File.exists? "config.yml"
+if !File.exists? "config.yml"
 	config = YAML.load_file('config.yml')
 else
-	config={"cache_folder" => "/tmp"}
+	config=YAML.load_file('config.example.yml')
 end
 
 
