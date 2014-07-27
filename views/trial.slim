@@ -1,4 +1,4 @@
-h1 Trial #{@trial["__project"]}/#{@trial["__experiment"]}/#{@trial["_id"]}
+h1 Trial <a href='/project/#{@project}'>#{@project}</a> / <a href='/project/#{@project}/experiment/#{@experiment}'>#{@experiment}</a> / #{@trial["_id"]}
 h2 #{@trial["__timestamp"]}
 table.table.table-striped.table-bordered.table-condensed
 	- for name, value in @trial

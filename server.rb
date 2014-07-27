@@ -59,6 +59,8 @@ end
 
 get '/trial/:trial_id' do
 	@trial=trials_collection.find_one({"_id" => BSON::ObjectId(params["trial_id"])})
+	@project=@trial["__project"]
+	@experiment=@trial["__experiment"]
 
 	@datasets=Dir.glob(cache_folder+"/#{@trial['_id']}-*.csv")
 	left=(cache_folder+"/#{@trial['_id']}-").length

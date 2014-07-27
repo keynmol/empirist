@@ -1,4 +1,4 @@
-h1 Trials in #{@project}/#{@experiment}
+h1 Trials in <a href='/project/#{@project}'>#{@project}</a> / #{@experiment}
 - for trial in @trials
 	h2 
 		a href="/trial/#{trial["_id"]}"
