@@ -1,0 +1,25 @@
+h1 Trials in #{@project}/#{@experiment}
+- for trial in @trials
+	h2 
+		a href="/trial/#{trial["_id"]}"
+			'Trial #{trial["_id"]}, from #{trial["__timestamp"]}
+	table.table.table-striped.table-bordered.table-condensed
+		- unless trial["__datastreams"].nil?
+			tr.warning
+				td 
+					b Datasets
+				td
+					== trial["__datastreams"].map{|ds| "<a href='/dataset_by_id/#{trial['_id']}/#{ds}'>#{ds}</a>"}.join(", ")
+		- unless trial["__plots"].nil?
+			tr.warning
+				td 
+					b Plots
+				td 
+					== trial["__plots"].map{|ds| "<a href='/plot_by_id/#{trial['_id']}/#{ds}'>#{ds}</a>"}.join(", ")
+
+		- for name, value in trial
+			- unless name.start_with? "__"
+				tr
+					td width=150
+						b #{name}
+					td #{value}

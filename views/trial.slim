@@ -1,0 +1,21 @@
+h1 Trial #{@trial["__project"]}/#{@trial["__experiment"]}/#{@trial["_id"]}
+h2 #{@trial["__timestamp"]}
+table.table.table-striped.table-bordered.table-condensed
+	- for name, value in @trial
+		- unless name.start_with? "__"
+			tr
+				td #{name}
+				td #{value}
+
+h3 Datasets stored
+ul
+	- for ds in @datasets
+		li 
+			a href="/dataset_by_id/#{@trial['_id']}/#{ds}"
+				== ds
+h3 Plots stored
+ul
+	- for ds in @plots
+		li 
+			a href="/plot_by_id/#{@trial['_id']}/#{ds}"
+				== ds
