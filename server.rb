@@ -6,7 +6,12 @@ require 'slim'
 
 include FileUtils::Verbose
 
-config = YAML.load_file('config.yml')
+if File.exists? "config.yml"
+	config = YAML.load_file('config.yml')
+else
+	config={"cache_folder" => "/tmp"}
+end
+
 
 if !ENV['MONGOHQ_URL']
 	client=::Mongo::MongoClient.new(config["mongodb"]["host"], config["mongodb"]["port"])
@@ -20,9 +25,12 @@ else
 	db=client
 end
 
+
 trials_collection=db[config["mongodb"]["trials_collection"]]
 
-Dir.mkdir(config["cache_folder"]) unless File.exists?(config["cache_folder"])
+cache_folder=config["cache_folder"]
+
+Dir.mkdir(cache_folder) unless File.exists?(cache_folder)
 
 get '/web' do
 	redirect '/projects'
@@ -52,10 +60,10 @@ end
 get '/trial/:trial_id' do
 	@trial=trials_collection.find_one({"_id" => BSON::ObjectId(params["trial_id"])})
 
-	@datasets=Dir.glob(config["cache_folder"]+"/#{@trial['_id']}-*.csv")
-	left=(config["cache_folder"]+"/#{@trial['_id']}-").length
+	@datasets=Dir.glob(cache_folder+"/#{@trial['_id']}-*.csv")
+	left=(cache_folder+"/#{@trial['_id']}-").length
 	@datasets.map!{|ds| ds[left..-5]}
-	@plots=Dir.glob(config["cache_folder"]+"/#{@trial['_id']}-*.pdf")
+	@plots=Dir.glob(cache_folder+"/#{@trial['_id']}-*.pdf")
 	@plots.map!{|pl| pl[left..-5]}
 
 	slim :trial
@@ -67,7 +75,7 @@ get '/dataset_by_id/:id/:data_stream' do
 	id=params["id"]
 	data_stream=params["data_stream"]
 	filename="#{id.to_s}-#{data_stream}.csv"
-	path=File.join(config["cache_folder"], filename)
+	path=File.join(cache_folder, filename)
 	
 	if File.exists? path
 		send_file path, filename: filename, type: "text/csv", disposition: "inline"
@@ -80,7 +88,7 @@ get '/plot_by_id/:id/:plot_name' do
 	id=params["id"]
 	plot_name=params["plot_name"]
 	filename="#{id.to_s}-#{plot_name}.pdf"
-	path=File.join(config["cache_folder"], filename)
+	path=File.join(cache_folder, filename)
 	puts path
 	
 	if File.exists? path
@@ -174,7 +182,7 @@ post '/upload_datastream' do
     
 
     puts "Uploading #{trial_id}-#{data_stream}. Tempfile size: #{File.size(tempfile.path)}"
-    new_path=File.join(config["cache_folder"], "#{trial_id.to_s}-#{data_stream}.csv")
+    new_path=File.join(cache_folder, "#{trial_id.to_s}-#{data_stream}.csv")
     
     cp(tempfile.path, new_path) unless File.exists? new_path
 end
@@ -192,7 +200,7 @@ post '/upload_plot' do
     trials_collection.update({"_id" => BSON::ObjectId(trial_id)}, trial)
     
     puts "Uploading #{trial_id}-#{plot_name}. Tempfile size: #{File.size(tempfile.path)}"
-    new_path=File.join(config["cache_folder"], "#{trial_id.to_s}-#{plot_name}.pdf")
+    new_path=File.join(cache_folder, "#{trial_id.to_s}-#{plot_name}.pdf")
 
     cp(tempfile.path, new_path) unless File.exists? new_path
 
