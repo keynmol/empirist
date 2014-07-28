@@ -17,10 +17,11 @@ if !ENV['OPENSHIFT_MONGODB_DB_URL']
 	client=::Mongo::MongoClient.new(config["mongodb"]["host"], config["mongodb"]["port"])
 	db=client.db(config["mongodb"]["db"])
 else
-	db = URI.parse(ENV['OPENSHIFT_MONGODB_DB_URL'])
-	db_name = db.path.gsub(/^\//, '')
-	client = Mongo::Connection.new(db.host, db.port).db(db_name)
-	client.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
+	# db = URI.parse(ENV['OPENSHIFT_MONGODB_DB_URL'])
+	# db_name = db.path.gsub(/^\//, '')
+	db_name="empirist"
+	client = Mongo::Connection.new(ENV['OPENSHIFT_MONGODB_DB_HOST'], ENV['OPENSHIFT_MONGODB_DB_PORT']).db(db_name)
+	# client.authenticate(ENV['OPENSHIFT_MONGODB_DB_USERNAME'], ENV['OPENSHIFT_MONGODB_DB_PASSWORD']) unless ENV['OPENSHIFT_MONGODB_DB_URL'].nil?
 
 	db=client
 end
