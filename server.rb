@@ -12,6 +12,10 @@ else
 	config=YAML.load_file('config.example.yml')
 end
 
+if ENV['OPENSHIFT_DATA_DIR']
+	config['cache_folder']=ENV['OPENSHIFT_DATA_DIR']
+end
+
 
 if !ENV['OPENSHIFT_MONGODB_DB_URL']
 	client=::Mongo::MongoClient.new(config["mongodb"]["host"], config["mongodb"]["port"])
