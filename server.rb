@@ -21,7 +21,7 @@ else
 	# db_name = db.path.gsub(/^\//, '')
 	db_name="empirist"
 	client = Mongo::Connection.new(ENV['OPENSHIFT_MONGODB_DB_HOST'], ENV['OPENSHIFT_MONGODB_DB_PORT']).db(db_name)
-	# client.authenticate(ENV['OPENSHIFT_MONGODB_DB_USERNAME'], ENV['OPENSHIFT_MONGODB_DB_PASSWORD']) unless ENV['OPENSHIFT_MONGODB_DB_URL'].nil?
+	client.authenticate(ENV['OPENSHIFT_MONGODB_DB_USERNAME'], ENV['OPENSHIFT_MONGODB_DB_PASSWORD']) unless ENV['OPENSHIFT_MONGODB_DB_URL'].nil?
 
 	db=client
 end
@@ -33,7 +33,7 @@ cache_folder=config["cache_folder"]
 
 Dir.mkdir(cache_folder) unless File.exists?(cache_folder)
 
-get '/web' do
+get '/' do
 	redirect '/projects'
 end
 
