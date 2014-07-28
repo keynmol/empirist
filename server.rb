@@ -49,12 +49,20 @@ get '/project/:project' do
 end
 
 get '/project/:project/experiment/:experiment' do
-	trial_query={__project: params["project"], __experiment: params["experiment"]}
+	trial_query={__project: params["project"], __experiment: params["experiment"], __success: 1}
 	@experiment=params["experiment"]
 	@project=params["project"]
 	@trials=trials_collection.find(trial_query).sort(:__timestamp => :desc).limit(20)
 
 	slim :trials
+end
+
+get '/annotation/:id' do
+	@trial=trials_collection.find_one({"_id" => BSON::ObjectId(params["id"])})
+	options=@trial.reject{|k,v| k.start_with?("__") || k.start_with?("_") }
+
+	options.map{|k,v| "#{k}=#{v}"}.join(", ")
+
 end
 
 get '/trial/:trial_id' do
@@ -80,7 +88,7 @@ get '/dataset_by_id/:id/:data_stream' do
 	path=File.join(cache_folder, filename)
 	
 	if File.exists? path
-		send_file path, filename: filename, type: "text/csv", disposition: "inline"
+		send_file path, filename: filename, type: "text", disposition: "inline"
 	else
 		404
 	end
