@@ -13,11 +13,11 @@ else
 end
 
 
-if !ENV['MONGOHQ_URL']
+if !ENV['OPENSHIFT_MONGODB_DB_URL']
 	client=::Mongo::MongoClient.new(config["mongodb"]["host"], config["mongodb"]["port"])
 	db=client.db(config["mongodb"]["db"])
 else
-	db = URI.parse(ENV['MONGOHQ_URL'])
+	db = URI.parse(ENV['OPENSHIFT_MONGODB_DB_URL'])
 	db_name = db.path.gsub(/^\//, '')
 	client = Mongo::Connection.new(db.host, db.port).db(db_name)
 	client.authenticate(db.user, db.password) unless (db.user.nil? || db.user.nil?)
