@@ -1,0 +1,3 @@
+h1 Pending trials in <a href='/project/#{@project}'>#{@project}</a> / <a href='/project/#{@project}/experiment/#{@experiment}'>#{@experiment}</a> 
+- for trial in @trials
+	== slim :trial_partial, :locals =>{:trial => trial}, :layout =>false

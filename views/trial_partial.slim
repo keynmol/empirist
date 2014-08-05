@@ -4,6 +4,9 @@ div.panel.panel-default
 			a href="/trial/#{trial["_id"]}"	Trial #{trial["_id"]}, from #{trial["__timestamp"]}
 	
 	div.panel-body
+		- if trial["__success"]!=1
+			h3 Progress: #{trial["__progress"]} %
+		
 		- unless trial["__datastreams"].nil?
 			h3 
 				b Datasets: 

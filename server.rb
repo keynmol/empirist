@@ -97,6 +97,15 @@ get '/project/:project/experiment/:experiment' do
 	slim :trials
 end
 
+get '/project/:project/experiment/:experiment/pending' do
+	trial_query={__project: params["project"], __experiment: params["experiment"], __success: 0}
+	@experiment=params["experiment"]
+	@project=params["project"]
+	@trials=trials_collection.find(trial_query).sort(:__timestamp => :desc)
+
+	slim :pending_trials
+end
+
 get '/project/:project/experiment/:experiment/select' do
 	full_query={__project: params["project"], __experiment: params["experiment"], __success: 1}
 	@active_query=full_query.merge(params.reject {|k,v| ["experiment","project", "splat","captures"].include? k })
@@ -201,6 +210,7 @@ get '/dataset/:project_name/:experiment_name/:data_stream?.?:format?' do
 	end 
 end
 
+
 get '/plot/:project_name/:experiment_name/:plot_name?.?:format?' do
 	trial_query={__project: params["project_name"], __experiment: params["experiment_name"]}
 	trial_query.merge!(params.reject {|k,v| ["experiment_name","project_name","format", "splat","captures","plot_name"].include? k })
@@ -274,4 +284,10 @@ post '/set_success' do
 	trial_id=params["trial_id"]
 	result=trials_collection.update({"_id" => BSON::ObjectId(trial_id)}, {"$set" => {"__success" => 1}})
 	puts "Setting #{trial_id} to success. Result: #{result}"
+end
+
+post '/update_progress' do 
+	trial_id=params["trial_id"]
+	result=trials_collection.update({"_id" => BSON::ObjectId(trial_id)}, {"$set" => {"__progress" => params["progress"]}})
+	puts "Setting #{trial_id}'progress to #{params['progress']}. Result: #{result}"
 end

@@ -33,15 +33,21 @@ javascript:
 
 p
 	a.btn.btn-danger href='select' Reset everything
+	a.btn.btn-info href='pending' Show pending trials
+br
 div.row 
 	div.col-md-6
 		table.table
 			- i=0
-			- for param, values in @full_selector
+			- for param, values in @full_selector.sort{|a1,a2| a1[0]=="runs" ? -1 : a1[0]<=>a2[0]}
 				- if i%2==0
 					tr
 						td 
-							h4 #{param}
+							h4 
+								- if param=="runs"
+									b #{param}
+								- else
+									' #{param}
 						td
 							- for value in values
 								- if @active_query[param]==@selector_labels[param][value]
@@ -54,11 +60,15 @@ div.row
 	div.col-md-6
 		table.table
 			- i=1
-			- for param, values in @full_selector
+			- for param, values in @full_selector.sort{|a1,a2| a1[0]=="runs" ? -1 : a1[0]<=>a2[0]}
 				- if i%2==0
 					tr
 						td 
-							h4 #{param}
+							h4 
+								- if param=="runs"
+									b #{param}
+								- else
+									' #{param}
 						td
 							- for value in values
 								- if @active_query[param]==@selector_labels[param][value]
