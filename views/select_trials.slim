@@ -1,0 +1,74 @@
+h1 Trials in <a href='/project/#{@project}'>#{@project}</a> / #{@experiment}
+
+javascript:
+	function rebuildLink(){
+		links=$(".empirist-selected")
+		url=""
+		$(".empirist-selected").each(function(index){url+=$(this).data("link")+"&";})
+		window.location.href='select?'+url
+	}
+	
+	function test(id){
+		link=$("#"+id)
+		classes=link.classList
+
+
+		if(link.hasClass("empirist-available")){
+			link.removeClass("empirist-available")
+			link.removeClass("btn-primary")
+			link.addClass("empirist-selected")
+			link.addClass("btn-success")
+		}
+		else if(link.hasClass("empirist-selected")){
+			link.removeClass("empirist-selected")
+			link.removeClass("btn-success")
+			link.addClass("empirist-available")
+			link.addClass("btn-primary")
+		}
+
+
+
+		rebuildLink()
+	}
+
+p
+	a.btn.btn-danger href='select' Reset everything
+div.row 
+	div.col-md-6
+		table.table
+			- i=0
+			- for param, values in @full_selector
+				- if i%2==0
+					tr
+						td 
+							h4 #{param}
+						td
+							- for value in values
+								- if @active_query[param]==@selector_labels[param][value]
+									a.btn.btn-success.empirist-selected id="#{param}#{@selector_labels[param][value].gsub('.','-')}" data-link="#{param}=#{@selector_labels[param][value]}" href="javascript:test('#{param}#{@selector_labels[param][value].gsub('.','-')}')"  #{@selector_labels[param][value]}
+								- elsif (@active_selector[param] and @active_selector[param].include?(value))
+									a.btn.btn-primary.empirist-available id="#{param}#{@selector_labels[param][value].gsub('.','-')}" data-link="#{param}=#{@selector_labels[param][value]}"  href="javascript:test('#{param}#{@selector_labels[param][value].gsub('.','-')}')" #{@selector_labels[param][value]}
+								- else
+									a.btn.btn-default.empirist-disabled.small disabled="disabled" #{@selector_labels[param][value]}
+				- i=i+1
+	div.col-md-6
+		table.table
+			- i=1
+			- for param, values in @full_selector
+				- if i%2==0
+					tr
+						td 
+							h4 #{param}
+						td
+							- for value in values
+								- if @active_query[param]==@selector_labels[param][value]
+									a.btn-sm.btn.btn-success.empirist-selected id="#{param}#{@selector_labels[param][value].gsub('.','-')}" data-link="#{param}=#{@selector_labels[param][value]}" href="javascript:test('#{param}#{@selector_labels[param][value].gsub('.','-')}')"  #{@selector_labels[param][value]}
+								- elsif (@active_selector[param] and @active_selector[param].include?(value))
+									a.btn-sm.btn.btn-primary.empirist-available id="#{param}#{@selector_labels[param][value].gsub('.','-')}" data-link="#{param}=#{@selector_labels[param][value]}"  href="javascript:test('#{param}#{@selector_labels[param][value].gsub('.','-')}')" #{@selector_labels[param][value]}
+								- else
+									a.btn-sm.btn.btn-default.empirist-disabled.small disabled="disabled" #{@selector_labels[param][value]}
+				- i=i+1
+h2
+	'Found #{@trials.count} trials with those parameters(showing last #{[@trials.count, 10].min})
+- for trial in @trials
+	== slim :trial_partial, :locals =>{:trial => trial}, :layout =>false

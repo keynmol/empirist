@@ -17,6 +17,8 @@ if ENV['OPENSHIFT_DATA_DIR']
 end
 
 
+
+
 if !ENV['OPENSHIFT_MONGODB_DB_URL']
 	client=::Mongo::MongoClient.new(config["mongodb"]["host"], config["mongodb"]["port"])
 	db=client.db(config["mongodb"]["db"])
@@ -32,6 +34,39 @@ end
 
 
 trials_collection=db[config["mongodb"]["trials_collection"]]
+
+class String
+  def is_number?
+    true if Float(self) rescue false
+  end
+end
+
+def generate_selectors(col, selector)
+	trials=col.find(selector)
+	puts trials.count
+
+	selector={}
+	selector_labels={}
+
+	trials.each do |trial|
+		trial.each {|k, v|
+			unless k.start_with?("_")
+				selector[k]||=[]
+				v_old=v
+				v=Float(v) if v.is_number?
+				selector_labels[k]||={}
+				selector_labels[k][v]=v_old
+
+				selector[k]<<v unless selector[k].include?(v)
+			end
+		}
+	end
+
+	selector.map{|k,v| v.sort!}
+
+	[selector,selector_labels]
+	
+end
 
 cache_folder=config["cache_folder"]
 
@@ -60,6 +95,24 @@ get '/project/:project/experiment/:experiment' do
 	@trials=trials_collection.find(trial_query).sort(:__timestamp => :desc).limit(20)
 
 	slim :trials
+end
+
+get '/project/:project/experiment/:experiment/select' do
+	full_query={__project: params["project"], __experiment: params["experiment"], __success: 1}
+	@active_query=full_query.merge(params.reject {|k,v| ["experiment","project", "splat","captures"].include? k })
+
+	@experiment=params["experiment"]
+	@project=params["project"]
+	# @trials=trials_collection.find(trial_query).sort(:__timestamp => :desc).limit(20)
+
+	@full_selector, @full_labels=generate_selectors(trials_collection, full_query)
+	@active_selector, @active_labels=generate_selectors(trials_collection, @active_query)
+
+	@selector_labels=@full_labels
+
+	@trials=trials_collection.find(@active_query).sort(:__timestamp => :desc).limit(10)
+
+	slim :select_trials
 end
 
 get '/annotation/:id' do
@@ -119,7 +172,6 @@ get '/find_trial/:project_name/:experiment_name' do
 	trial_query[:__success]=1
 
 	trials=trials_collection.find(trial_query).sort(:__timestamp => :desc)
-	puts "yup#{trials.count}"
 	
 	if trials.count > 0
 		trials.first["_id"].to_s
@@ -157,9 +209,6 @@ get '/plot/:project_name/:experiment_name/:plot_name?.?:format?' do
 	plot_name=params["plot_name"]
 
 	trials=trials_collection.find(trial_query).sort(:__timestamp => :desc)
-
-	puts trial_query
-	puts trials.count
 
 	if trials.count > 0
 		latest_trial = trials.first
@@ -217,7 +266,7 @@ post '/upload_plot' do
     puts "Uploading #{trial_id}-#{plot_name}. Tempfile size: #{File.size(tempfile.path)}"
     new_path=File.join(cache_folder, "#{trial_id.to_s}-#{plot_name}.pdf")
 
-    cp(tempfile.path, new_path) unless File.exists? new_path
+    cp(tempfile.path, new_path)
 
 end
 

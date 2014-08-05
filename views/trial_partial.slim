@@ -1,0 +1,35 @@
+div.panel.panel-default
+	div.panel-heading 
+		h4
+			a href="/trial/#{trial["_id"]}"	Trial #{trial["_id"]}, from #{trial["__timestamp"]}
+	
+	div.panel-body
+		- unless trial["__datastreams"].nil?
+			h3 
+				b Datasets: 
+				==' trial["__datastreams"].map{|ds| "<a href='/dataset_by_id/#{trial['_id']}/#{ds}'>#{ds}</a>"}.join(", ")
+		- unless trial["__plots"].nil?
+			h3
+				b Plots: 
+				==' trial["__plots"].map{|ds| "<a href='/plot_by_id/#{trial['_id']}/#{ds}'>#{ds}</a>"}.join(", ")
+		div.row
+			div.col-md-6
+				table.table.table-condensed
+					- i=0
+					- for name, value in trial
+						- unless name.start_with? "_" or i%2!=0
+							tr
+								td width=150
+									b #{name}
+								td #{value}
+						- i+=1
+			div.col-md-6
+				- i=1
+				table.table.table-condensed
+					- for name, value in trial
+						- unless name.start_with? "_" or i%2!=0
+							tr
+								td width=150
+									b #{name}
+								td #{value}
+						- i+=1
